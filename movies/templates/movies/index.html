@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block content %}
+
+<div class="container" style="background-color: black;">
+  {% if request.user.is_superuser == 1 %}
+  <a class="btn btn-info" href="{% url 'movies:movie_create' %}">영화 추가하기</a>
+  {% endif %}
+ 
+<!-- 검색기능 -->
+<form class="d-flex justify-content-end" action="{% url 'movies:index' %}" method="get">
+  {% csrf_token %}
+  <input style="height: 37.6px;" type="form-control mr-sm-2" type="search" placeholder="영화를 검색하세요." aria-label="Search" name="q" >
+  <button class="btn btn-secondary my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>
+</form>
+
+{% if search_movie_num %}
+  <h2 class="text-white text-center">{{ search_movie_num }}개의 영화가 검색되었습니다.</h2>
+{% endif %}
+
+
+{% for search_movie in search_movies %}
+<div class="d-flex justify-content-center">
+<div class="card ml-4 mb-3 mt-3" style="width:75%;">
+  <div class="row no-gutters">
+    <div class="col-md-4">
+      <img src="https://image.tmdb.org/t/p/original/{{ search_movie.poster_path }}" class="d-block w-100 mb-3" alt="검색한 영화 포스터">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{ search_movie.title }}</h5>
+        <p class="card-text" style="height: 20%;">{{ search_movie.overview }}</p>
+        <div>
+        <p>영화 평점 : {{ search_movie.vote_average }}</p>
+          {% if search_movie.vote_average == 10 %}
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+          {% elif search_movie.vote_average > 8 %}
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star "></h1>
+            {% elif search_movie.vote_average > 6 %}
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            {% elif search_movie.vote_average > 4 %}
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            {% elif search_movie.vote_average > 2 %}
+            <h1 class="fa fa-star checked"></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            <h1 class="fa fa-star "></h1>
+            {% else %}
+            <h1 class="fa fa-star"></h1>
+            <h1 class="fa fa-star"></h1>
+            <h1 class="fa fa-star"></h1>
+            <h1 class="fa fa-star"></h1>
+            <h1 class="fa fa-star"></h1>
+            {% endif %}
+        </div>
+      </div>
+      <div class="d-flex justify-content-end mt-3 mr-4">
+      <a href="{% url 'movies:detail' search_movie.id %}" class="btn btn-secondary">영화 상세보기</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endfor %}
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="alert alert-danger" role="alert">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% if not user.is_authenticated %}
+  <h3 class="text-white pt-3 d-flex justify-content-center">오늘의 추천 영화</h3>
+{% else %}
+  <h3 class="text-white pt-3 d-flex justify-content-center">{{ user.username }}님만의 추천 영화</h3>
+{% endif %}
+<div id="carouselExampleCaptions" class="carousel slide mt-4" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active mt-4"></li>
+      <li data-target="#carouselExampleCaptions" data-slide-to="1" class="mt-4"></li>
+      <li data-target="#carouselExampleCaptions" data-slide-to="2" class="mt-4"></li>
+    </ol>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <div class="d-flex">
+      {% for movie1 in movies1 %}
+        <div class="col">
+          <div class="row">
+            <img src="https://image.tmdb.org/t/p/original/{{ movie1.poster_path }}" class="d-block w-100" alt="...">
+          </div>
+          <div class="row d-flex justify-content-center mt-2">
+            <a href="{% url 'movies:detail' movie1.pk %}" class="btn btn-outline-light">영화 상세보기</a>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+      <div class="d-flex m-4 p-2 text-white">
+        {% if not user.is_authenticated %}
+        <h5>인기 1~4위</h5>
+        {% else %}
+          {% if len_sorted_data %}
+          <h5>내가 좋아하는 장르 {{ sorted_data1 }}, {{ sorted_data2 }} 관련 영화</h5>
+          {% else %}
+          <h5>보고싶은 영화들을 찜해주시면 더 좋은 영화를 추천해줘요!! </h5>
+          {% endif %}
+        {% endif %}
+      </div>
+
+    </div>
+    <div class="carousel-item">
+      
+      <div class="d-flex">
+      {% for movie2 in movies2 %}
+      <div class="col">
+        <div class="row ">
+          <img src="https://image.tmdb.org/t/p/original/{{ movie2.poster_path }}" class="d-block w-100" alt="...">
+        </div>
+        <div class="row d-flex justify-content-center mt-2">
+          <a href="{% url 'movies:detail' movie2.pk %}" class="btn btn-outline-light">영화 상세보기</a>
+        </div>
+      </div>
+      {% endfor %}
+      </div>
+      <div class="d-flex m-4 p-2 text-white">
+        {% if not user.is_authenticated %}
+        
+        <h5>인기 5~8위</h5>
+        {% else %}
+          {% if len_sorted_data %}
+          <h5>내가 좋아하는 장르 {{ sorted_data1 }} 관련 영화</h5>
+          {% else %}
+          <h5>보고싶은 영화들을 찜해주시면 더 좋은 영화를 추천해줘요!! </h5>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    <div class="carousel-item">
+      <div class="d-flex">
+      {% for movie3 in movies3 %}
+      <div class="col">
+        <div class="row">
+          <img src="https://image.tmdb.org/t/p/original/{{ movie3.poster_path }}" class="d-block w-100" alt="...">
+        </div>
+        <div class="row d-flex justify-content-center mt-2">
+          <a href="{% url 'movies:detail' movie3.pk %}" class="btn btn-outline-light">영화 상세보기</a>
+        </div>
+      </div>
+      {% endfor %}
+      </div>
+
+      <div class="d-flex m-4 p-2 text-white">
+        {% if not user.is_authenticated %}
+        
+        <h5>인기 9~12위</h5>
+        {% else %}
+          {% if len_sorted_data %}
+          <h5>내가 좋아하는 장르 {{ sorted_data2 }} 관련 영화</h5>
+          {% else %}
+          <h5>보고싶은 영화들을 찜해주시면 더 좋은 영화를 추천해줘요!! </h5>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+
+{% load bootstrap_pagination %}
+<div class="container mt-4 mb-4">
+  <h3 class="text-white d-flex justify-content-center">영화 목록 (평점순)</h3>
+  <div class="row">
+{% for movie in page_obj %}
+<div class="card col-lg-3 col-sm-6 p-2 my-4 border border-white rounded" style="background-color: black;">
+  <p class="card-text d-flex justify-content-end mr-2"><small class="text-white">평점 : {{ movie.vote_average }}</small></p>
+  <a href="{% url 'movies:detail' movie.pk %}" class="btn btn-primary border-0" style="background-color: black;"><img src="https://image.tmdb.org/t/p/original/{{ movie.poster_path }}" class="card-img-top" alt="..."></a>
+  <div class="card-body">
+    <h5 class="card-title text-white"> {{ movie.title }}</h5>
+
+    
+    <p class="card-text">인기도 : {{ movie.popularity }}</p>
+
+    <!-- <a href="{% url 'movies:detail' movie.pk %}" class="btn btn-primary">영화 상세보기</a> -->
+  </div>
+</div>
+
+{% endfor %}
+</div>
+</div>
+<!-- paginator -->
+<div class="d-flex justify-content-center">
+  {% bootstrap_paginate page_obj range=5 show_prev_next="false" show_first_last="true" %}
+  <nav aria-label="Page navigation example">
+    <div class="pagination" >
+        <span class="step-links" >
+       
+            {% if page_obj.has_previous %}
+                <a href="?page=1"></a>
+                <a href="?page={{ page_obj.previous_page_number }}"></a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"></a>
+                <a href="?page={{ page_obj.paginator.num_pages }}"></a>
+            {% endif %}
+          </div>
+      
+            <span class="ml-4 mt-1 current text-white">
+              총 페이지 {{ page_obj.paginator.num_pages }}
+            </span>
+        
+        </span>
+    </div>
+  </nav>
+</div>
+</div>
+<style>
+.checked {
+  color: yellow;
+}
+.carousel-control-next {
+  
+}
+</style>
+
+</style>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+
+{% block content %}
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="alert alert-success" role="alert">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="container formdiv">
+    <form action="" method="POST">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-primary float-right  mb-4">작성</button>
+
+        </div>
+    </form>
+</div>
+
+<style>
+    label {
+        color: white;
+    }
+
+    input {
+        width: 100%;
+    }
+
+    textarea {
+        width: 100%;
+    }
+
+    .formdiv {
+        padding: 0 15%;
+    }
+
+    span {
+        color: thistle;
+    }
+</style>
+{% endblock %}
